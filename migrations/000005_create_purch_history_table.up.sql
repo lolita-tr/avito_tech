@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS purch_history(
-    user_id UUID NOT NULL REFERENCE users(id),
-    item_id UUID NOT NULL REFERENCE users(id),
+    user_id UUID NOT NULL REFERENCES users(id),
+    item_id UUID NOT NULL REFERENCES users(id),
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
+);

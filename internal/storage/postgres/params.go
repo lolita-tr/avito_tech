@@ -9,7 +9,7 @@ type DBParams struct {
 	URL string
 }
 
-func NewDBParams() *DBParams {
+func NewDBParams() DBParams {
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	user := os.Getenv("DB_USER")
@@ -18,5 +18,5 @@ func NewDBParams() *DBParams {
 
 	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", user, password, host, port, database)
 
-	return &DBParams{url}
+	return DBParams{url}
 }

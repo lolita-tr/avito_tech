@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS balance(
-    user_id UUID NOT NULL REFERENCE users(id),
+    user_id UUID NOT NULL REFERENCES users(id),
     coins_amount INT NOT NULL,
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

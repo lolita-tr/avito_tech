@@ -1,9 +1,11 @@
 package auth
 
 import (
+	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/pkg/errors"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -35,4 +37,34 @@ func (p *JwtProvider) GenerateAccessToken(userUUID string) (string, error) {
 	}
 
 	return accessTokenString, nil
+}
+
+func (p *JwtProvider) ValidateAccessToken(accessTokenString string) (string, error) {
+	tokenString := strings.TrimSpace(accessTokenString)
+	if tokenString == "" {
+		return "", errors.New("empty access token")
+	}
+
+	token, err := jwt.Parse(accessTokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return p.jwtKey, nil
+	})
+
+	if err != nil {
+		return "", errors.Wrap(err, "failed to parse access token")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return "", errors.New("invalid token claims")
+	}
+
+	userUUID, ok := claims["user_id"].(string)
+	if !ok || userUUID == "" {
+		return "", errors.New("user_id not found in token")
+	}
+
+	return userUUID, nil
 }

@@ -33,5 +33,9 @@ func RunMigrations(p DBParams) {
 		log.Fatalf("could not create migration instance: %v", err)
 	}
 
+	if err1 := m.Up(); err1 != nil && err1 != migrate.ErrNoChange {
+		log.Fatalf("migration up failed: %v", err1)
+	}
+
 	fmt.Println("Running migrations successfully")
 }

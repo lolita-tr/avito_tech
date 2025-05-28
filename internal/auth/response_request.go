@@ -5,6 +5,6 @@ type AuthRequest struct {
 	Password string `json:"password"`
 }
 
-type AuthRequest struct {
+type AuthResponse struct {
 	Token string `json:"token"`
 }
