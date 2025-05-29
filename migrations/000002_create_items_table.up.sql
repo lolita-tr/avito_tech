@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS items (
 );
 
 INSERT INTO items(name, price)
-VALUE
+VALUES
     ('t-shirt', 80),
     ('cup',  20),
     ('book', 50),
@@ -17,4 +17,4 @@ VALUE
     ('umbrella', 200),
     ('socks', 10),
     ('wallet', 50),
-    ('pink-hoody', 500)
+    ('pink-hoody', 500);

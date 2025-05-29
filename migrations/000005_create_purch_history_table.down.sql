@@ -1,0 +1,1 @@
+DROP TABLE purch_history CASCADE;
