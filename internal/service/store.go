@@ -4,6 +4,7 @@ import (
 	"avito_tech/internal/storage"
 	"context"
 	"errors"
+	"strings"
 )
 
 type BuyResponse struct {
@@ -23,6 +24,8 @@ func NewStoreService(repository *storage.UsersDB) *StoreService {
 }
 
 func (s *StoreService) BuyItem(ctx context.Context, userId string, itemName string) (*BuyResponse, error) {
+	strings.TrimSpace(itemName)
+
 	itemID, err := s.repository.GetItemID(ctx, itemName)
 	if err != nil {
 		return nil, err
@@ -42,7 +45,7 @@ func (s *StoreService) BuyItem(ctx context.Context, userId string, itemName stri
 		return nil, errors.New("not enought coins")
 	}
 
-	err = s.repository.BuyItem(ctx, userId, itemName)
+	err = s.repository.BuyItem(ctx, userId, itemID)
 	if err != nil {
 		return nil, err
 	}

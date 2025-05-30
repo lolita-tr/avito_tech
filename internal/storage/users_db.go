@@ -136,7 +136,7 @@ func (ud *UsersDB) GetItemName(ctx context.Context, itemID string) (string, erro
 
 func (ud *UsersDB) GetItemID(ctx context.Context, itemName string) (string, error) {
 	var itemID string
-	err := ud.db.QueryRow(ctx, getItemIdQuery, itemID).Scan(&itemID)
+	err := ud.db.QueryRow(ctx, getItemIdQuery, itemName).Scan(&itemID)
 
 	if err != nil {
 		return "", fmt.Errorf("failed to get item id: %w", err)

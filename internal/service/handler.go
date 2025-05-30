@@ -4,6 +4,7 @@ import (
 	"avito_tech/internal/auth"
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
+	"log"
 	"net/http"
 )
 
@@ -18,11 +19,15 @@ func NewHandler(store *StoreService) *Handler {
 func (h *Handler) BuyItem(w http.ResponseWriter, r *http.Request) {
 	itemName := chi.URLParam(r, "item")
 
+	log.Printf("%s", itemName)
+
 	claims, ok := r.Context().Value("jwt_claims").(*auth.Claims)
 	if !ok {
 		http.Error(w, "Invalid token", http.StatusUnauthorized)
 		return
 	}
+
+	log.Printf("%s", claims.UserID)
 
 	response, err := h.store.BuyItem(r.Context(), claims.UserID, itemName)
 	if err != nil {
