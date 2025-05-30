@@ -22,12 +22,14 @@ func Middleware(jwt *auth.JwtProvider) func(next http.Handler) http.Handler {
 			}
 
 			tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-			userID, err := jwt.ValidateAccessToken(tokenString)
+
+			claims, err := jwt.ParseWithClaims(tokenString)
 			if err != nil {
 				http.Error(w, "Invalid token", http.StatusUnauthorized)
 			}
 
-			ctx := context.WithValue(r.Context(), "user_id", userID)
+			ctx := context.WithValue(r.Context(), "jwt_claims", claims)
+
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

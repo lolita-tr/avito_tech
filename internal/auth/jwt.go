@@ -15,6 +15,11 @@ type JwtProvider struct {
 	signingMethod jwt.SigningMethod
 }
 
+type Claims struct {
+	UserID string `json:"user_id"`
+	jwt.RegisteredClaims
+}
+
 func NewJwtProvider() *JwtProvider {
 	jwtSecret := os.Getenv("JWT_SECRET")
 
@@ -67,4 +72,24 @@ func (p *JwtProvider) ValidateAccessToken(accessTokenString string) (string, err
 	}
 
 	return userUUID, nil
+}
+
+func (p *JwtProvider) ParseWithClaims(tokenString string) (*Claims, error) {
+	token, err := jwt.ParseWithClaims(
+		tokenString,
+		&Claims{},
+		func(token *jwt.Token) (interface{}, error) {
+			return p.jwtKey, nil
+		},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+		return claims, nil
+	}
+
+	return nil, errors.New("invalid token")
 }

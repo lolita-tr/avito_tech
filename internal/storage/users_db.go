@@ -23,7 +23,7 @@ const (
 	getUserQuery = `
 	SELECT id, password FROM users WHERE login = $1`
 
-	addCoinsQuery = `
+	updateBalanceQuery = `
 	INSERT INTO balance (user_id, coins_amount) VALUES ($1, $2)`
 
 	getBalancesQuery = `
@@ -32,6 +32,15 @@ const (
 
 	addItemQuery = `
 	INSERT INTO purch_history (user_id, item_id) VALUES ($1, $2)`
+
+	getPricesQuery = `
+	SELECT price FROM items WHERE id = $1`
+
+	getItemNameQuery = `
+	SELECT name FROM items WHERE id = $1`
+
+	getItemIdQuery = `
+	SELECT id FROM items WHERE name = $1`
 )
 
 func (ud *UsersDB) CreateUser(ctx context.Context, login, password string) (string, error) {
@@ -45,7 +54,7 @@ func (ud *UsersDB) CreateUser(ctx context.Context, login, password string) (stri
 		return "", fmt.Errorf("failed to create user: %w", err)
 	}
 
-	_, err = ud.db.Exec(ctx, addCoinsQuery, userID, 1000)
+	_, err = ud.db.Exec(ctx, updateBalanceQuery, userID, 1000)
 
 	return userID, nil
 }
@@ -77,15 +86,15 @@ func (ud *UsersDB) GetBalance(ctx context.Context, userID string) (int, error) {
 	return balance, nil
 }
 
-func (ud *UsersDB) AddCoins(ctx context.Context, userID string, coins int) error {
-	currentBalance, err := ud.GetBalance(ctx, userID)
-
-	if err != nil {
-		return fmt.Errorf("failed to get current balance: %w", err)
-	}
-
-	newBalance := currentBalance + coins
-	_, err = ud.db.Exec(ctx, addCoinsQuery, userID, newBalance)
+func (ud *UsersDB) UpdateCoins(ctx context.Context, userID string, coins int) error {
+	//currentBalance, err := ud.GetBalance(ctx, userID)
+	//
+	//if err != nil {
+	//	return fmt.Errorf("failed to get current balance: %w", err)
+	//}
+	//
+	//newBalance := currentBalance + coins
+	_, err := ud.db.Exec(ctx, updateBalanceQuery, userID, coins)
 
 	if err != nil {
 		return fmt.Errorf("failed to add coins: %w", err)
@@ -101,4 +110,37 @@ func (ud *UsersDB) BuyItem(ctx context.Context, userID string, itemID string) er
 	}
 
 	return nil
+}
+
+func (ud *UsersDB) GetPrices(ctx context.Context, itemID string) (int, error) {
+	var prices int
+	err := ud.db.QueryRow(ctx, getPricesQuery, itemID).Scan(&prices)
+
+	if err != nil {
+		return 0, fmt.Errorf("failed to get prices: %w", err)
+	}
+
+	return prices, nil
+}
+
+func (ud *UsersDB) GetItemName(ctx context.Context, itemID string) (string, error) {
+	var itemName string
+	err := ud.db.QueryRow(ctx, getItemNameQuery, itemID).Scan(&itemName)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to get item name: %w", err)
+	}
+
+	return itemName, nil
+}
+
+func (ud *UsersDB) GetItemID(ctx context.Context, itemName string) (string, error) {
+	var itemID string
+	err := ud.db.QueryRow(ctx, getItemIdQuery, itemID).Scan(&itemID)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to get item id: %w", err)
+	}
+
+	return itemID, nil
 }

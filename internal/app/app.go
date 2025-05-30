@@ -3,6 +3,7 @@ package app
 import (
 	"avito_tech/internal/auth"
 	"avito_tech/internal/middleware"
+	"avito_tech/internal/service"
 	"avito_tech/internal/storage"
 	"avito_tech/internal/storage/postgres"
 	"github.com/go-chi/chi/v5"
@@ -20,15 +21,20 @@ func Run() {
 
 	usersDb := storage.NewUsersDB(dbPool)
 	jwtProvider := auth.NewJwtProvider()
+
 	authService := auth.NewAuthorizationService(usersDb, jwtProvider)
 	authHandle := auth.NewHandle(authService)
+
+	storeService := service.NewStoreService(usersDb)
+	storeHandler := service.NewHandler(storeService)
 
 	postgres.RunMigrations(dbParams)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Middleware(jwtProvider))
 
-	r.Get("/api/auth", authHandle.Authorization)
+	r.Post("/api/auth", authHandle.Authorization)
+	r.Post("/api/buy/{item}", storeHandler.BuyItem)
 
 	server := &http.Server{
 		Addr:    ":8080",
