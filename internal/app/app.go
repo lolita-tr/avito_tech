@@ -26,7 +26,8 @@ func Run() {
 	authHandle := auth.NewHandle(authService)
 
 	storeService := service.NewStoreService(usersDb)
-	storeHandler := service.NewHandler(storeService)
+	coinsService := service.NewCoinsService(usersDb)
+	storeHandler := service.NewHandler(storeService, coinsService)
 
 	postgres.RunMigrations(dbParams)
 
@@ -35,6 +36,7 @@ func Run() {
 
 	r.Post("/api/auth", authHandle.Authorization)
 	r.Post("/api/buy/{item}", storeHandler.BuyItem)
+	r.Post("/api/sendCoin", storeHandler.SendCoins)
 
 	server := &http.Server{
 		Addr:    ":8080",
