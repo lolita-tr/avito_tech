@@ -3,6 +3,7 @@ package service
 import (
 	"avito_tech/internal/storage"
 	"context"
+	"fmt"
 )
 
 type SendCoinsRequest struct {
@@ -29,10 +30,17 @@ func (s *CoinsService) SendCoins(ctx context.Context, userID, to_user string, co
 	}
 
 	if balance < coins_amount {
-		return &SendCoinsResponse{Status: "failed"}, nil
+		return &SendCoinsResponse{
+			Status: fmt.Sprintf("failed, you have: %d coins", balance),
+		}, nil
 	}
 
-	balance_2, err := s.repository.GetBalance(ctx, to_user)
+	to_userID, _, err := s.repository.GetUser(ctx, to_user)
+	if err != nil {
+		return nil, err
+	}
+
+	balance_2, err := s.repository.GetBalance(ctx, to_userID)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +53,12 @@ func (s *CoinsService) SendCoins(ctx context.Context, userID, to_user string, co
 		return nil, err
 	}
 
-	err = s.repository.UpdateCoins(ctx, to_user, newBalance_2)
+	err = s.repository.UpdateCoins(ctx, to_userID, newBalance_2)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.repository.SaveCoinsHistory(ctx, userID, to_userID, coins_amount)
 	if err != nil {
 		return nil, err
 	}

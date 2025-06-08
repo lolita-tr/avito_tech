@@ -10,11 +10,12 @@ import (
 type Handler struct {
 	store *StoreService
 	coins *CoinsService
+	info  *Info
 }
 
-func NewHandler(store *StoreService, coins *CoinsService) *Handler {
+func NewHandler(store *StoreService, coins *CoinsService, info *Info) *Handler {
 
-	return &Handler{store: store, coins: coins}
+	return &Handler{store: store, coins: coins, info: info}
 }
 
 func (h *Handler) BuyItem(w http.ResponseWriter, r *http.Request) {
@@ -53,6 +54,25 @@ func (h *Handler) SendCoins(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response, err := h.coins.SendCoins(r.Context(), claims.UserID, request.ToUser, request.Amount)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func (h *Handler) GetInfo(w http.ResponseWriter, r *http.Request) {
+	claims, ok := r.Context().Value("jwt_claims").(*auth.Claims)
+	if !ok {
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		return
+	}
+
+	response, err := h.info.GetUserInfo(r.Context(), claims.UserID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
