@@ -26,7 +26,7 @@ func NewCoinsService(db *storage.UsersDB) *CoinsService {
 func (s *CoinsService) SendCoins(ctx context.Context, userID, to_user string, coins_amount int) (*SendCoinsResponse, error) {
 	balance, err := s.repository.GetBalance(ctx, userID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get get balance failed: %v", err)
 	}
 
 	if balance < coins_amount {
@@ -37,12 +37,12 @@ func (s *CoinsService) SendCoins(ctx context.Context, userID, to_user string, co
 
 	to_userID, _, err := s.repository.GetUser(ctx, to_user)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get get user failed: %v", err)
 	}
 
 	balance_2, err := s.repository.GetBalance(ctx, to_userID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get get balance failed: %v", err)
 	}
 
 	newBalance_user := balance - coins_amount
@@ -50,17 +50,17 @@ func (s *CoinsService) SendCoins(ctx context.Context, userID, to_user string, co
 
 	err = s.repository.UpdateCoins(ctx, userID, newBalance_user)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("update coins failed: %v", err)
 	}
 
 	err = s.repository.UpdateCoins(ctx, to_userID, newBalance_2)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("update coins failed: %v", err)
 	}
 
 	err = s.repository.SaveCoinsHistory(ctx, userID, to_userID, coins_amount)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("save coins history failed: %v", err)
 	}
 
 	return &SendCoinsResponse{Status: SUCCESS}, nil

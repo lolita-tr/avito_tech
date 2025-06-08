@@ -28,22 +28,22 @@ func NewInfo(repository *storage.UsersDB) *Info {
 func (i *Info) GetUserInfo(ctx context.Context, userId string) (*InfoResponse, error) {
 	balance, err := i.getBalance(ctx, userId)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get user balance failed: %v", err)
 	}
 
 	items, err := i.getItems(ctx, userId)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get items failed: %v", err)
 	}
 
 	sendTo, err := i.getSendTo(ctx, userId, SendCoins)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get send to failed: %v", err)
 	}
 
 	getFrom, err := i.getGetFrom(ctx, userId, GetCoins)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get get from failed: %v", err)
 	}
 
 	return &InfoResponse{

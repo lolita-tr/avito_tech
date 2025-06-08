@@ -4,6 +4,7 @@ import (
 	"avito_tech/internal/storage"
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -28,17 +29,17 @@ func (s *StoreService) BuyItem(ctx context.Context, userId string, itemName stri
 
 	itemID, err := s.repository.GetItemID(ctx, itemName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get item id failed: %v", err)
 	}
 
 	balance, err := s.repository.GetBalance(ctx, userId)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get balance failed: %v", err)
 	}
 
 	price, err := s.repository.GetPrices(ctx, itemID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get price failed: %v", err)
 	}
 
 	if price > balance {
@@ -47,13 +48,13 @@ func (s *StoreService) BuyItem(ctx context.Context, userId string, itemName stri
 
 	err = s.repository.BuyItem(ctx, userId, itemID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("buy item failed: %v", err)
 	}
 
 	newBalance := balance - price
 	err = s.repository.UpdateCoins(ctx, userId, newBalance)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("update coins failed: %v", err)
 	}
 
 	return &BuyResponse{
